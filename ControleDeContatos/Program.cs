@@ -1,3 +1,6 @@
+using ControleDeContatos.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace ControleDeContatos
 {
     public class Program
@@ -8,6 +11,9 @@ namespace ControleDeContatos
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            var provider = builder.Services.BuildServiceProvider();
+            var configuration = provider.GetRequiredService<IConfiguration>(); 
+            builder.Services.AddDbContext<BancoContext>(o => o.UseSqlServer(configuration.GetConnectionString("DataBase")));
 
             var app = builder.Build();
 
