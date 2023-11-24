@@ -1,4 +1,6 @@
 using ControleDeContatos.Data;
+using ControleDeContatos.Helper;
+using ControleDeContatos.Repositório;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControleDeContatos
@@ -14,7 +16,16 @@ namespace ControleDeContatos
             var provider = builder.Services.BuildServiceProvider();
             var configuration = provider.GetRequiredService<IConfiguration>(); 
             builder.Services.AddDbContext<BancoContext>(o => o.UseSqlServer(configuration.GetConnectionString("DataBase")));
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddScoped<IContatoRepositorio, ContatoRepositorio>();
+            builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
+            builder.Services.AddScoped<ISessao, Sessao>();
 
+            builder.Services.AddSession(o =>
+            {
+                o.Cookie.HttpOnly = true;
+                o.Cookie.IsEssential = true;
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -28,9 +39,11 @@ namespace ControleDeContatos
 
             app.UseAuthorization();
 
+            app.UseSession();
+
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Login}/{action=Index}/{id?}");
 
             app.Run();
         }
